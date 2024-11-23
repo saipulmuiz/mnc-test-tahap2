@@ -29,12 +29,12 @@ func (u *UserService) RegisterUser(request params.RegisterUser) *params.Response
 		return helpers.HandleErrorService(http.StatusBadRequest, err.Error())
 	}
 
-	if userCheck.UserID != uuid.Nil {
+	if userCheck.UserID != "" {
 		return helpers.HandleErrorService(http.StatusBadRequest, "Phone Number already registered")
 	}
 
 	user := models.User{
-		UserID:      uuid.New(),
+		UserID:      uuid.New().String(),
 		FirstName:   request.FirstName,
 		LastName:    request.LastName,
 		PhoneNumber: request.PhoneNumber,
@@ -50,7 +50,7 @@ func (u *UserService) RegisterUser(request params.RegisterUser) *params.Response
 	result := params.ResponseSuccess{
 		Status: "SUCCESS",
 		Data: params.RegisterUserResponse{
-			UserID:      userData.UserID.String(),
+			UserID:      userData.UserID,
 			FirstName:   userData.FirstName,
 			LastName:    userData.LastName,
 			PhoneNumber: userData.PhoneNumber,
@@ -80,12 +80,12 @@ func (u *UserService) Login(request params.UserLogin) *params.Response {
 		return helpers.HandleErrorService(http.StatusBadRequest, "Phone Number and PIN doesn't match")
 	}
 
-	accessToken, err := helpers.GenerateAccessToken(user.UserID.String(), user.PhoneNumber)
+	accessToken, err := helpers.GenerateAccessToken(user.UserID, user.PhoneNumber)
 	if err != nil {
 		return helpers.HandleErrorService(http.StatusInternalServerError, "Failed to generate access token")
 	}
 
-	refreshToken, err := helpers.GenerateRefreshToken(user.UserID.String())
+	refreshToken, err := helpers.GenerateRefreshToken(user.UserID)
 	if err != nil {
 		return helpers.HandleErrorService(http.StatusInternalServerError, "failed to generate refresh token")
 	}
@@ -102,7 +102,7 @@ func (u *UserService) Login(request params.UserLogin) *params.Response {
 
 func (u *UserService) UpdateProfile(userId string, request params.UpdateProfile) *params.Response {
 	checkData, _ := u.userRepo.CheckUserByID(userId, &models.User{})
-	if checkData.UserID == uuid.Nil {
+	if checkData.UserID == "" {
 		return helpers.HandleErrorService(http.StatusNotFound, "User not found")
 	}
 
@@ -112,8 +112,7 @@ func (u *UserService) UpdateProfile(userId string, request params.UpdateProfile)
 		Address:   request.Address,
 	}
 
-	profileUpdated, err := u.userRepo.UpdateUser(checkData.UserID.String(), &user)
-
+	profileUpdated, err := u.userRepo.UpdateUser(checkData.UserID, &user)
 	if err != nil {
 		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
 	}
@@ -121,7 +120,7 @@ func (u *UserService) UpdateProfile(userId string, request params.UpdateProfile)
 	result := params.ResponseSuccess{
 		Status: "SUCCESS",
 		Data: params.UpdateProfileResponse{
-			UserID:      profileUpdated.UserID.String(),
+			UserID:      profileUpdated.UserID,
 			FirstName:   profileUpdated.FirstName,
 			LastName:    profileUpdated.LastName,
 			Address:     profileUpdated.Address,

@@ -37,7 +37,7 @@ func ConnectDB() *gorm.DB {
 		models.User{},
 		models.Transaction{},
 		models.Transfer{},
-		models.TopUp{},
+		models.Topup{},
 		models.Payment{},
 	)
 

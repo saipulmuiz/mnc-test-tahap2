@@ -15,7 +15,7 @@ func Auth() gin.HandlerFunc {
 
 		if token == "" {
 			ctx.AbortWithStatusJSON(401, gin.H{
-				"error":   "Unauthorized",
+				"error":   "Unauthenticated",
 				"message": "Token Not Found",
 			})
 			return
@@ -24,7 +24,7 @@ func Auth() gin.HandlerFunc {
 		bearer := strings.HasPrefix(token, "Bearer")
 		if !bearer {
 			ctx.AbortWithStatusJSON(401, gin.H{
-				"error":   "Unauthorized",
+				"error":   "Unauthenticated",
 				"message": "Bearer Not FOund",
 			})
 			return
@@ -34,7 +34,7 @@ func Auth() gin.HandlerFunc {
 
 		if tokenStr == "" {
 			ctx.AbortWithStatusJSON(401, gin.H{
-				"error":   "Unauthorized",
+				"error":   "Unauthenticated",
 				"message": "Token STR",
 			})
 			return
@@ -44,8 +44,7 @@ func Auth() gin.HandlerFunc {
 		if err != nil {
 			log.Errorln("ERROR:", err)
 			ctx.AbortWithStatusJSON(401, gin.H{
-				"error":   "Unauthorized",
-				"message": err.Error(),
+				"message": "Unauthenticated",
 			})
 			return
 		}

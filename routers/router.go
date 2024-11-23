@@ -42,10 +42,13 @@ func RouterConfig(db *gorm.DB) *gin.Engine {
 	userService := services.NewUserService(userRepo)
 	userController := controllers.NewUserController(userService)
 
-	// Product
-	productRepo := repositories.NewProductRepo(db, globalRepo)
-	productService := services.NewProductService(productRepo)
-	productController := controllers.NewProductController(productService)
+	// Transaction
+	transactionRepo := repositories.NewTransactionRepo(db, globalRepo)
+	topupRepo := repositories.NewTopupRepo(db, globalRepo)
+	paymentRepo := repositories.NewPaymentRepo(db, globalRepo)
+	transferRepo := repositories.NewTransferRepo(db, globalRepo)
+	transactionService := services.NewTransactionService(transactionRepo, topupRepo, paymentRepo, transferRepo, userRepo, db)
+	transactionController := controllers.NewTransactionController(transactionService)
 
 	//Route Group
 	mainRouter := route.Group("/v1")
@@ -60,12 +63,8 @@ func RouterConfig(db *gorm.DB) *gin.Engine {
 			// user router
 			authorized.PUT("/profile", userController.UpdateProfile)
 
-			// product router
-			authorized.GET("/products", productController.GetProducts)
-			authorized.GET("/products/:productId", productController.GetProductById)
-			authorized.POST("/products", productController.CreateProduct)
-			authorized.PUT("/products/:productId", productController.UpdateProduct)
-			authorized.DELETE("/products/:productId", productController.DeleteProduct)
+			// transaction router
+			authorized.POST("/topup", transactionController.Topup)
 		}
 	}
 
