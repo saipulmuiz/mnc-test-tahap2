@@ -42,12 +42,12 @@ type TransferResponse struct {
 }
 
 type GetTransactionRes struct {
-	ProductID    int     `json:"product_id"`
-	ProductName  string  `json:"product_name"`
-	Description  string  `json:"description"`
-	ProductPrice float64 `json:"product_price"`
-	Stock        int     `json:"stock"`
-	MinStock     int     `json:"min_stock"`
-	CreatedAt    string  `json:"created_at"`
-	UpdatedAt    string  `json:"updated_at"`
+	Status          string  `json:"status"`
+	UserID          string  `json:"user_id"`
+	TransactionType string  `json:"transaction_type"`
+	Amount          float64 `json:"amount"`
+	Remarks         string  `json:"remarks"`
+	BalanceBefore   float64 `json:"balance_before"`
+	BalanceAfter    float64 `json:"balance_after"`
+	CreatedDate     string  `json:"created_date"`
 }

@@ -20,6 +20,12 @@ func NewTransactionController(service *services.TransactionService) *Transaction
 	}
 }
 
+func (u *TransactionController) GetTransactions(c *gin.Context) {
+	userID := c.GetString("user_id")
+	result := u.transactionService.GetTransactions(userID)
+	c.JSON(result.Status, result.Payload)
+}
+
 func (u *TransactionController) Topup(c *gin.Context) {
 	var req params.TopupRequest
 	validate := validator.New()

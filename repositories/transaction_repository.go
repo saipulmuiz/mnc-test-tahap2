@@ -7,8 +7,7 @@ import (
 )
 
 type TransactionRepo interface {
-	GetTransactions(page, size int) (*[]models.Transaction, int64, error)
-	FindById(transactionId int) (*models.Transaction, error)
+	GetTransactions(userID string) (*[]models.Transaction, error)
 	CreateTransaction(tx *gorm.DB, transaction *models.Transaction) (*models.Transaction, error)
 }
 
@@ -21,32 +20,19 @@ func NewTransactionRepo(db *gorm.DB, globalRepo GlobalRepo) TransactionRepo {
 	return &transactionRepo{db, globalRepo}
 }
 
-func (u *transactionRepo) GetTransactions(page, size int) (*[]models.Transaction, int64, error) {
-	var (
-		transactions []models.Transaction
-		count        int64
-	)
+func (u *transactionRepo) GetTransactions(userID string) (*[]models.Transaction, error) {
+	var transactions []models.Transaction
 	err := u.db.
-		Order("created_at DESC").
+		Order("created_date DESC").
 		Preload(clause.Associations).
-		Scopes(u.globalRepo.Paginate(page, size)).
+		Where("user_id = ?", userID).
 		Find(&transactions).Error
 
 	if err != nil {
-		return nil, count, err
+		return nil, err
 	}
 
-	err = u.db.
-		Model(&transactions).
-		Count(&count).Error
-
-	return &transactions, count, err
-}
-
-func (u *transactionRepo) FindById(transactionId int) (*models.Transaction, error) {
-	var transaction models.Transaction
-	err := u.db.Where("transaction_id = ?", transactionId).First(&transaction).Error
-	return &transaction, err
+	return &transactions, err
 }
 
 func (u *transactionRepo) CreateTransaction(tx *gorm.DB, transaction *models.Transaction) (*models.Transaction, error) {

@@ -57,10 +57,9 @@ type PaginationResponse struct {
 	CurrentCount int   `json:"current_count"`
 }
 
-type ResponseWithPagination struct {
-	Message    string             `json:"message"`
-	Data       interface{}        `json:"data"`
-	Pagination PaginationResponse `json:"pagination"`
+type ResponseWithData struct {
+	Status string      `json:"status"`
+	Result interface{} `json:"result"`
 }
 
 type ResponseSuccess struct {

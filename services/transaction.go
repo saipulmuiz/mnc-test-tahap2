@@ -2,6 +2,7 @@ package services
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,6 +37,58 @@ func NewTransactionService(
 		transferRepo:    transferRepo,
 		userRepo:        userRepo,
 		db:              db,
+	}
+}
+
+func (u *TransactionService) GetTransactions(userID string) *params.Response {
+	var (
+		transactions *[]models.Transaction
+		err          error
+	)
+
+	transactions, err = u.transactionRepo.GetTransactions(userID)
+	if err != nil {
+		return helpers.HandleErrorService(http.StatusBadRequest, err.Error())
+	}
+
+	var transactionData []map[string]interface{}
+	for _, transaction := range *transactions {
+		var dynamicKey string
+
+		switch transaction.ReferenceType {
+		case models.TRANSACTION_REFERENCE_TYPE_TOPUP:
+			dynamicKey = "top_up_id"
+		case models.TRANSACTION_REFERENCE_TYPE_PAYMENT:
+			dynamicKey = "payment_id"
+		case models.TRANSACTION_REFERENCE_TYPE_TRANSFER:
+			dynamicKey = "transfer_id"
+		default:
+			dynamicKey = "unknown_id"
+		}
+
+		data := map[string]interface{}{
+			dynamicKey:         transaction.ReferenceID,
+			"status":           transaction.Status,
+			"user_id":          transaction.UserID,
+			"transaction_type": strings.ToUpper(transaction.Type),
+			"amount":           transaction.Amount,
+			"remarks":          transaction.Remarks,
+			"balance_before":   transaction.BalanceBefore,
+			"balance_after":    transaction.BalanceAfter,
+			"created_date":     helpers.ParseDateTime(helpers.DATE_FORMAT_YYYY_MM_DD_TIME, transaction.CreatedDate),
+		}
+
+		transactionData = append(transactionData, data)
+	}
+
+	result := params.ResponseWithData{
+		Status: "SUCCESS",
+		Result: transactionData,
+	}
+
+	return &params.Response{
+		Status:  http.StatusOK,
+		Payload: result,
 	}
 }
 
