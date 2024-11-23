@@ -39,7 +39,7 @@ func NewTransactionService(
 	}
 }
 
-func (u *TransactionService) Topup(userID string, request params.Topup) *params.Response {
+func (u *TransactionService) Topup(userID string, request params.TopupRequest) *params.Response {
 	// Start transaction
 	tx := u.db.Begin()
 	defer func() {
@@ -58,6 +58,7 @@ func (u *TransactionService) Topup(userID string, request params.Topup) *params.
 		UserID:      userID,
 		Amount:      request.Amount,
 		CreatedDate: time.Now(),
+		UpdatedDate: time.Now(),
 	}
 	topup, err := u.topupRepo.Topup(tx, topup)
 	if err != nil {
@@ -107,7 +108,88 @@ func (u *TransactionService) Topup(userID string, request params.Topup) *params.
 	}
 
 	return &params.Response{
-		Status:  http.StatusCreated,
+		Status:  http.StatusOK,
+		Payload: result,
+	}
+}
+
+func (u *TransactionService) Payment(userID string, request params.PaymentRequest) *params.Response {
+	// Start transaction
+	tx := u.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	user, _ := u.userRepo.FindById(userID)
+	if user.UserID == "" {
+		return helpers.HandleErrorService(http.StatusNotFound, "User not found")
+	}
+
+	if user.Balance < request.Amount {
+		return helpers.HandleErrorService(http.StatusBadRequest, "Balance is not enough")
+	}
+
+	payment := &models.Payment{
+		PaymentID:   uuid.NewString(),
+		UserID:      userID,
+		Amount:      request.Amount,
+		Remarks:     request.Remarks,
+		CreatedDate: time.Now(),
+		UpdatedDate: time.Now(),
+	}
+	payment, err := u.paymentRepo.Payment(tx, payment)
+	if err != nil {
+		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
+	}
+
+	balanceAfter := user.Balance - request.Amount
+	transaction := models.Transaction{
+		TransactionID: uuid.NewString(),
+		UserID:        userID,
+		Type:          models.TRANSACTION_TYPE_DEBIT,
+		ReferenceType: models.TRANSACTION_REFERENCE_TYPE_PAYMENT,
+		ReferenceID:   payment.PaymentID,
+		Amount:        request.Amount,
+		Remarks:       request.Remarks,
+		BalanceBefore: user.Balance,
+		BalanceAfter:  balanceAfter,
+		Status:        models.TRANSACTION_STATUS_SUCCESS,
+		CreatedDate:   time.Now(),
+		UpdatedDate:   time.Now(),
+	}
+
+	_, err = u.transactionRepo.CreateTransaction(tx, &transaction)
+	if err != nil {
+		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
+	}
+
+	_, err = u.userRepo.UpdateBalance(tx, user.UserID, balanceAfter)
+	if err != nil {
+		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
+	}
+
+	// Commit transaction
+	err = tx.Commit().Error
+	if err != nil {
+		return helpers.HandleErrorService(http.StatusInternalServerError, "Failed to commit transaction")
+	}
+
+	result := params.ResponseSuccess{
+		Status: "SUCCESS",
+		Data: params.PaymentResponse{
+			PaymentID:     payment.PaymentID,
+			Amount:        request.Amount,
+			Remarks:       request.Remarks,
+			BalanceBefore: user.Balance,
+			BalanceAfter:  balanceAfter,
+			CreatedDate:   helpers.ParseDateTime(helpers.DATE_FORMAT_YYYY_MM_DD_TIME, payment.CreatedDate),
+		},
+	}
+
+	return &params.Response{
+		Status:  http.StatusOK,
 		Payload: result,
 	}
 }

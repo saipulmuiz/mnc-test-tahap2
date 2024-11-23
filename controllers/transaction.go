@@ -44,3 +44,28 @@ func (u *TransactionController) Topup(c *gin.Context) {
 
 	c.JSON(result.Status, result.Payload)
 }
+
+func (u *TransactionController) Payment(c *gin.Context) {
+	var req params.PaymentRequest
+	validate := validator.New()
+
+	err := c.ShouldBind(&req)
+	if err != nil {
+		helpers.HandleErrorController(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = validate.Struct(req)
+	if err != nil {
+		validationMessage := helpers.BuildAndGetValidationMessage(err)
+
+		helpers.HandleErrorController(c, http.StatusBadRequest, validationMessage)
+		return
+	}
+
+	userID := c.GetString("user_id")
+
+	result := u.transactionService.Payment(userID, req)
+
+	c.JSON(result.Status, result.Payload)
+}

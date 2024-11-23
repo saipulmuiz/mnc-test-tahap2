@@ -65,6 +65,7 @@ func RouterConfig(db *gorm.DB) *gin.Engine {
 
 			// transaction router
 			authorized.POST("/topup", transactionController.Topup)
+			authorized.POST("/pay", transactionController.Payment)
 		}
 	}
 

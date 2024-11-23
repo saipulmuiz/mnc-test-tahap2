@@ -45,6 +45,7 @@ func Auth() gin.HandlerFunc {
 			log.Errorln("ERROR:", err)
 			ctx.AbortWithStatusJSON(401, gin.H{
 				"message": "Unauthenticated",
+				"error":   err.Error(),
 			})
 			return
 		}
