@@ -1,0 +1,343 @@
+{
+	"info": {
+		"_postman_id": "0a3bd726-3c35-4865-b294-ec7dff58f4b1",
+		"name": "MNC Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10902234"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "User",
+					"item": [
+						{
+							"name": "Update Profile",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"first_name\": \"Admin Update\",\n    \"last_name\": \"MNC Update\",\n    \"address\": \"Jln. Merdeka, No. 59, jakarta Update\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{be_development_url}}/v1/profile",
+									"host": [
+										"{{be_development_url}}"
+									],
+									"path": [
+										"v1",
+										"profile"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Transaction",
+					"item": [
+						{
+							"name": "Get Transaction Report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{be_development_url}}/v1/transactions",
+									"host": [
+										"{{be_development_url}}"
+									],
+									"path": [
+										"v1",
+										"transactions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Topup",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"amount\": 100000\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{be_development_url}}/v1/topup",
+									"host": [
+										"{{be_development_url}}"
+									],
+									"path": [
+										"v1",
+										"topup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Payment",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"amount\": 10000,\n    \"remarks\": \"Pulsa Telkomsel 10k\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{be_development_url}}/v1/pay",
+									"host": [
+										"{{be_development_url}}"
+									],
+									"path": [
+										"v1",
+										"pay"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Transfer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"target_user\": \"907ed676-8acb-4b83-91ac-1fc4023725b7\",\n    \"amount\": 15000,\n    \"remarks\": \"Hadiah Pernikahan\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{be_development_url}}/v1/transfer",
+									"host": [
+										"{{be_development_url}}"
+									],
+									"path": [
+										"v1",
+										"transfer"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{accessToken}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Guest",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// {\n//     \"first_name\" : \"Admin\",\n//     \"last_name\" : \"MNC\",\n//     \"phone_number\" : \"62813128489441\",\n//     \"address\" : \"Jln. Merdeka, No. 59, jakarta\",\n//     \"pin\" : \"123456\"\n// }\n{\n    \"first_name\" : \"Abdul\",\n    \"last_name\" : \"Hanif\",\n    \"phone_number\" : \"62813128489442\",\n    \"address\" : \"Jln. Merdeka, No. 60, jakarta\",\n    \"pin\" : \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{be_development_url}}/v1/register",
+							"host": [
+								"{{be_development_url}}"
+							],
+							"path": [
+								"v1",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code != 200) {",
+									"    console.error(\"an error occured\")",
+									"}",
+									"",
+									"postman.setEnvironmentVariable(",
+									"    \"accessToken\",",
+									"    pm.response.json().access_token",
+									")",
+									"",
+									"postman.setEnvironmentVariable(",
+									"    \"refreshToken\",",
+									"    pm.response.json().refresh_token",
+									")",
+									"",
+									"request = JSON.parse(pm.request.body.raw)",
+									"",
+									"console.info(`accessToken and refreshToken is updated for user ${request.phone_number}`)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone_number\" : \"62813128489441\",\n    \"pin\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{be_development_url}}/v1/login",
+							"host": [
+								"{{be_development_url}}"
+							],
+							"path": [
+								"v1",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code != 200) {",
+									"    console.error(\"an error occured\")",
+									"}",
+									"",
+									"postman.setEnvironmentVariable(",
+									"    \"accessToken\",",
+									"    pm.response.json().access_token",
+									")",
+									"",
+									"postman.setEnvironmentVariable(",
+									"    \"refreshToken\",",
+									"    pm.response.json().refresh_token",
+									")",
+									"",
+									"request = JSON.parse(pm.request.body.raw)",
+									"",
+									"console.info(`accessToken and refreshToken is updated for user ${request.phone_number}`)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\" : \"{{refreshToken}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{be_development_url}}/v1/refresh-token",
+							"host": [
+								"{{be_development_url}}"
+							],
+							"path": [
+								"v1",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
