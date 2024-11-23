@@ -10,6 +10,7 @@ import (
 	"github.com/saipulmuiz/mnc-test-tahap2/models"
 	"github.com/saipulmuiz/mnc-test-tahap2/params"
 	"github.com/saipulmuiz/mnc-test-tahap2/repositories"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -248,14 +249,6 @@ func (u *TransactionService) Payment(userID string, request params.PaymentReques
 }
 
 func (u *TransactionService) Transfer(userID string, request params.TransferRequest) *params.Response {
-	// Start transaction
-	tx := u.db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
 	user, _ := u.userRepo.FindById(userID)
 	if user.UserID == "" {
 		return helpers.HandleErrorService(http.StatusNotFound, "User not found")
@@ -280,70 +273,89 @@ func (u *TransactionService) Transfer(userID string, request params.TransferRequ
 		CreatedDate: time.Now(),
 		UpdatedDate: time.Now(),
 	}
-	transfer, err := u.transferRepo.Transfer(tx, transfer)
+	transfer, err := u.transferRepo.Transfer(nil, transfer)
 	if err != nil {
 		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
 	}
-
 	balanceAfter := user.Balance - request.Amount
-	transaction := models.Transaction{
-		TransactionID: uuid.NewString(),
-		UserID:        userID,
-		Type:          models.TRANSACTION_TYPE_DEBIT,
-		ReferenceType: models.TRANSACTION_REFERENCE_TYPE_TRANSFER,
-		ReferenceID:   transfer.TransferID,
-		Amount:        request.Amount,
-		Remarks:       request.Remarks,
-		BalanceBefore: user.Balance,
-		BalanceAfter:  balanceAfter,
-		Status:        models.TRANSACTION_STATUS_SUCCESS,
-		CreatedDate:   time.Now(),
-		UpdatedDate:   time.Now(),
-	}
 
-	_, err = u.transactionRepo.CreateTransaction(tx, &transaction)
-	if err != nil {
-		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
-	}
+	// Update and create trx on background process
+	go func(balanceAfter float64) {
+		// Start transaction
+		tx := u.db.Begin()
+		defer func() {
+			if r := recover(); r != nil {
+				tx.Rollback()
+				log.Println("Recovered from panic:", r)
+			}
+		}()
 
-	// update balance user sender
-	_, err = u.userRepo.UpdateBalance(tx, user.UserID, balanceAfter)
-	if err != nil {
-		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
-	}
+		transaction := models.Transaction{
+			TransactionID: uuid.NewString(),
+			UserID:        userID,
+			Type:          models.TRANSACTION_TYPE_DEBIT,
+			ReferenceType: models.TRANSACTION_REFERENCE_TYPE_TRANSFER,
+			ReferenceID:   transfer.TransferID,
+			Amount:        request.Amount,
+			Remarks:       request.Remarks,
+			BalanceBefore: user.Balance,
+			BalanceAfter:  balanceAfter,
+			Status:        models.TRANSACTION_STATUS_SUCCESS,
+			CreatedDate:   time.Now(),
+			UpdatedDate:   time.Now(),
+		}
 
-	balanceAfterTarget := targetUser.Balance + request.Amount
-	transactionTarget := models.Transaction{
-		TransactionID: uuid.NewString(),
-		UserID:        targetUser.UserID,
-		Type:          models.TRANSACTION_TYPE_CREDIT,
-		ReferenceType: models.TRANSACTION_REFERENCE_TYPE_TRANSFER,
-		ReferenceID:   transfer.TransferID,
-		Amount:        request.Amount,
-		Remarks:       request.Remarks,
-		BalanceBefore: targetUser.Balance,
-		BalanceAfter:  balanceAfterTarget,
-		Status:        models.TRANSACTION_STATUS_SUCCESS,
-		CreatedDate:   time.Now(),
-		UpdatedDate:   time.Now(),
-	}
+		_, err = u.transactionRepo.CreateTransaction(tx, &transaction)
+		if err != nil {
+			tx.Rollback()
+			log.Errorln("Failed to create sender transaction:", err)
+			return
+		}
 
-	_, err = u.transactionRepo.CreateTransaction(tx, &transactionTarget)
-	if err != nil {
-		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
-	}
+		// update balance user sender
+		_, err = u.userRepo.UpdateBalance(tx, user.UserID, balanceAfter)
+		if err != nil {
+			tx.Rollback()
+			log.Errorln("Failed to update sender balance:", err)
+			return
+		}
 
-	// update balance user receiver
-	_, err = u.userRepo.UpdateBalance(tx, targetUser.UserID, balanceAfterTarget)
-	if err != nil {
-		return helpers.HandleErrorService(http.StatusInternalServerError, err.Error())
-	}
+		balanceAfterTarget := targetUser.Balance + request.Amount
+		transactionTarget := models.Transaction{
+			TransactionID: uuid.NewString(),
+			UserID:        targetUser.UserID,
+			Type:          models.TRANSACTION_TYPE_CREDIT,
+			ReferenceType: models.TRANSACTION_REFERENCE_TYPE_TRANSFER,
+			ReferenceID:   transfer.TransferID,
+			Amount:        request.Amount,
+			Remarks:       request.Remarks,
+			BalanceBefore: targetUser.Balance,
+			BalanceAfter:  balanceAfterTarget,
+			Status:        models.TRANSACTION_STATUS_SUCCESS,
+			CreatedDate:   time.Now(),
+			UpdatedDate:   time.Now(),
+		}
 
-	// Commit transaction
-	err = tx.Commit().Error
-	if err != nil {
-		return helpers.HandleErrorService(http.StatusInternalServerError, "Failed to commit transaction")
-	}
+		_, err = u.transactionRepo.CreateTransaction(tx, &transactionTarget)
+		if err != nil {
+			tx.Rollback()
+			log.Errorln("Failed to create receiver transaction:", err)
+			return
+		}
+
+		// update balance user receiver
+		_, err = u.userRepo.UpdateBalance(tx, targetUser.UserID, balanceAfterTarget)
+		if err != nil {
+			tx.Rollback()
+			log.Errorln("Failed to update receiver balance:", err)
+			return
+		}
+
+		// Commit transaction
+		if err := tx.Commit().Error; err != nil {
+			log.Errorln("Failed to commit background transaction:", err)
+		}
+	}(balanceAfter)
 
 	result := params.ResponseSuccess{
 		Status: "SUCCESS",
