@@ -21,7 +21,7 @@ func NewTransactionController(service *services.TransactionService) *Transaction
 }
 
 func (u *TransactionController) Topup(c *gin.Context) {
-	var req params.Topup
+	var req params.TopupRequest
 	validate := validator.New()
 
 	err := c.ShouldBind(&req)

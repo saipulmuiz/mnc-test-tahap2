@@ -1,6 +1,10 @@
 package params
 
-type Topup struct {
+type TopupRequest struct {
+	Amount float64 `json:"amount" validate:"required"`
+}
+
+type PaymentRequest struct {
 	Amount float64 `json:"amount" validate:"required"`
 }
 
