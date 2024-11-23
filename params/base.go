@@ -32,7 +32,7 @@ type ResponseSuccessLogout struct {
 }
 
 type ResponseErrorMessage struct {
-	Error string `json:"error"`
+	Message string `json:"message"`
 }
 
 type ResponseUrl struct {

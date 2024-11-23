@@ -1,14 +1,10 @@
 package middlewares
 
 import (
-	"strconv"
-	"time"
-
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/saipulmuiz/mnc-test-tahap2/helpers"
 )
@@ -26,7 +22,6 @@ func Auth() gin.HandlerFunc {
 		}
 
 		bearer := strings.HasPrefix(token, "Bearer")
-
 		if !bearer {
 			ctx.AbortWithStatusJSON(401, gin.H{
 				"error":   "Unauthorized",
@@ -34,7 +29,8 @@ func Auth() gin.HandlerFunc {
 			})
 			return
 		}
-		tokenStr := strings.Split(token, "Bearer ")[1]
+
+		tokenStr := strings.TrimPrefix(token, "Bearer ")
 
 		if tokenStr == "" {
 			ctx.AbortWithStatusJSON(401, gin.H{
@@ -54,46 +50,11 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		var data = claims.(jwt.MapClaims)
-		userId := data["id"].(float64)
-		strUserId := strconv.FormatFloat(userId, 'f', -1, 64)
+		userId := claims.UserID
 
-		ctx.Set("user_id", strUserId)
-		ctx.Set("name", data["name"])
-		ctx.Set("email", data["email"])
-		ctx.Set("exp", data["exp"])
-		ctx.Set("exp_date", data["exp_date"])
-
-		if data["exp_date"] == nil {
-			ctx.AbortWithStatusJSON(401, gin.H{
-				"error":   "Unauthorized",
-				"message": "Invalid token",
-			})
-			return
-		}
-
-		timeNow := time.Now()
-		expiredTime := data["exp_date"].(string)
-
-		parsed, _ := time.Parse(time.RFC3339, expiredTime)
-
-		if err != nil {
-			log.Errorln("ERROR:", err)
-			ctx.AbortWithStatusJSON(401, gin.H{
-				"error":   "Unauthorized",
-				"message": err.Error(),
-			})
-			return
-		}
-
-		if timeNow.After(parsed) {
-			ctx.AbortWithStatusJSON(401, gin.H{
-				"error":         "loggedOut",
-				"message":       "Token has expired, please login again",
-				"is_logged_out": true,
-			})
-			return
-		}
+		ctx.Set("user_id", userId)
+		ctx.Set("phone_number", claims.PhoneNumber)
+		ctx.Set("exp_date", claims.ExpiresAt)
 
 		ctx.Next()
 	}

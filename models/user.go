@@ -14,7 +14,7 @@ type User struct {
 	LastName    string    `gorm:"type:varchar(100);not null" json:"last_name"`
 	PhoneNumber string    `gorm:"type:varchar(16);unique;not null" json:"phone_number"`
 	Address     string    `gorm:"type:text" json:"address"`
-	PIN         string    `gorm:"type:char(6);not null" json:"-"`
+	PIN         string    `gorm:"type:varchar;not null" json:"-"`
 	Balance     float64   `gorm:"type:decimal(18,2);default:0" json:"balance"`
 	CreatedDate time.Time `gorm:"autoCreateTime" json:"created_date"`
 	UpdatedDate time.Time `gorm:"autoUpdateTime" json:"updated_date"`

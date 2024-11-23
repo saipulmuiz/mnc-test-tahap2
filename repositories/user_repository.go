@@ -10,7 +10,7 @@ type UserRepo interface {
 	RegisterUser(user *models.User) (*models.User, error)
 	FindById(userId int) (*models.User, error)
 	CheckUserByPhoneNumber(phoneNumber string) (*models.User, error)
-	CheckUserByID(id int, user *models.User) (*models.User, error)
+	CheckUserByID(userId string, user *models.User) (*models.User, error)
 	UpdateUser(userId string, userUpdate *models.User) (*models.User, error)
 }
 
@@ -38,8 +38,8 @@ func (u *userRepo) CheckUserByPhoneNumber(phoneNumber string) (*models.User, err
 	return user, u.db.Where("phone_number=?", phoneNumber).Take(&user).Error
 }
 
-func (u *userRepo) CheckUserByID(id int, user *models.User) (*models.User, error) {
-	return user, u.db.Where("id", id).Take(&user).Error
+func (u *userRepo) CheckUserByID(userId string, user *models.User) (*models.User, error) {
+	return user, u.db.Where("user_id", userId).Take(&user).Error
 }
 
 func (u *userRepo) UpdateUser(userId string, userUpdate *models.User) (*models.User, error) {

@@ -8,6 +8,15 @@ type RegisterUser struct {
 	PIN         string `json:"pin" validate:"required"`
 }
 
+type RegisterUserResponse struct {
+	UserID      string `json:"user_id"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	PhoneNumber string `json:"phone_number"`
+	Address     string `json:"address"`
+	CreatedDate string `json:"created_date"`
+}
+
 type UpdateProfile struct {
 	FirstName string `json:"first_name" validate:"required"`
 	LastName  string `json:"last_name" validate:"required"`
@@ -22,7 +31,6 @@ type UpdateProfileResponse struct {
 	UpdatedDate string `json:"updated_date"`
 }
 
-// swagger:model
 type UserLogin struct {
 	PhoneNumber string `json:"phone_number" validate:"required"`
 	PIN         string `json:"pin" validate:"required"`
@@ -47,4 +55,8 @@ type ProfileResponse struct {
 	Email     string `json:"email"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
+}
+
+type RefreshToken struct {
+	RefreshToken string `json:"refresh_token" validate:"required"`
 }

@@ -18,6 +18,21 @@ func ConnectDB() *gorm.DB {
 		panic(err)
 	}
 
+	err = db.Exec("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_type') THEN CREATE TYPE transaction_type AS ENUM ('credit', 'debit'); END IF; END $$;").Error
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Exec("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_status') THEN CREATE TYPE transaction_status AS ENUM ('pending', 'success', 'failed'); END IF; END $$;").Error
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Exec("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transfer_status') THEN CREATE TYPE transfer_status AS ENUM ('pending', 'success', 'failed'); END IF; END $$;").Error
+	if err != nil {
+		panic(err)
+	}
+
 	err = db.Debug().AutoMigrate(
 		models.User{},
 		models.Transaction{},

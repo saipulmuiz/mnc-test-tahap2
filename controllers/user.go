@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -69,13 +68,22 @@ func (u *UserController) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	//Check User Id From Token
-	id, _ := strconv.Atoi(c.GetString("user_id"))
-	result := u.userService.UpdateProfile(id, req)
+	userId := c.GetString("user_id")
+	result := u.userService.UpdateProfile(userId, req)
 	c.JSON(result.Status, result.Payload)
 }
 
-func (u *UserController) Logout(c *gin.Context) {
-	result := u.userService.Logout()
+func (u *UserController) RefreshToken(c *gin.Context) {
+	var req params.RefreshToken
+
+	err := c.ShouldBind(&req)
+
+	if err != nil {
+		helpers.HandleErrorController(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	result := u.userService.RefreshToken(req)
+
 	c.JSON(result.Status, result.Payload)
 }

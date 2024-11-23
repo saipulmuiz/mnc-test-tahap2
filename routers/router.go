@@ -47,28 +47,18 @@ func RouterConfig(db *gorm.DB) *gin.Engine {
 	productService := services.NewProductService(productRepo)
 	productController := controllers.NewProductController(productService)
 
-	// Cart
-	cartRepo := repositories.NewCartRepo(db, globalRepo)
-	cartService := services.NewCartService(cartRepo, productRepo)
-	cartController := controllers.NewCartController(cartService)
-
-	// Order
-	orderRepo := repositories.NewOrderRepo(db, globalRepo)
-	orderService := services.NewOrderService(productRepo, cartRepo, orderRepo, db)
-	orderController := controllers.NewOrderController(orderService)
-
 	//Route Group
 	mainRouter := route.Group("/v1")
 	{
 		mainRouter.POST("/register", userController.RegisterUser)
 		mainRouter.POST("/login", userController.Login)
+		mainRouter.POST("/refresh-token", userController.RefreshToken)
 
 		authorized := mainRouter.Group("/")
 		authorized.Use(middlewares.Auth())
 		{
 			// user router
-			authorized.POST("/logout", userController.Logout)
-			authorized.PUT("/me/update", userController.UpdateProfile)
+			authorized.PUT("/profile", userController.UpdateProfile)
 
 			// product router
 			authorized.GET("/products", productController.GetProducts)
@@ -76,17 +66,6 @@ func RouterConfig(db *gorm.DB) *gin.Engine {
 			authorized.POST("/products", productController.CreateProduct)
 			authorized.PUT("/products/:productId", productController.UpdateProduct)
 			authorized.DELETE("/products/:productId", productController.DeleteProduct)
-
-			// cart router
-			authorized.GET("/carts", cartController.GetCarts)
-			authorized.POST("/carts", cartController.AddToCart)
-			authorized.PUT("/carts/:cartId", cartController.UpdateCart)
-			authorized.DELETE("/carts/:cartId", cartController.DeleteCart)
-
-			// order router
-			authorized.GET("/orders", orderController.GetOrders)
-			authorized.GET("/orders/:orderId", orderController.GetOrderById)
-			authorized.POST("/orders/checkout", orderController.CheckoutOrder)
 		}
 	}
 

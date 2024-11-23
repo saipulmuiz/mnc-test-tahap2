@@ -21,7 +21,7 @@ func HandleErrorService(statusCode int, errMsg string) *params.Response {
 	return &params.Response{
 		Status: statusCode,
 		Payload: params.ResponseErrorMessage{
-			Error: throwCustomMessageIfServerError(statusCode, errMsg),
+			Message: throwCustomMessageIfServerError(statusCode, errMsg),
 		},
 	}
 }

@@ -2,33 +2,29 @@ package helpers
 
 import (
 	"errors"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/saipulmuiz/mnc-test-tahap2/config"
 )
 
-func VerifyToken(tokenString string) (interface{}, error) {
+func VerifyToken(tokenString string) (*Claims, error) {
 	errResponse := errors.New("Token-Invalid")
 
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errResponse
-		}
-
-		return []byte(os.Getenv("SECRET_KEY")), nil
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.JWTConfig.AccessSecret), nil
 	})
-
 	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
 		return nil, errResponse
 	}
 
-	if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
-		return nil, errResponse
-	}
+	claims := token.Claims.(*Claims)
 
-	return token.Claims.(jwt.MapClaims), nil
+	return claims, nil
 }
 
 type Claims struct {
