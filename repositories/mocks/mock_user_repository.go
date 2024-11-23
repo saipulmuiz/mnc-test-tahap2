@@ -9,6 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	models "github.com/saipulmuiz/mnc-test-tahap2/models"
+	gorm "gorm.io/gorm"
 )
 
 // MockUserRepo is a mock of UserRepo interface.
@@ -34,23 +35,8 @@ func (m *MockUserRepo) EXPECT() *MockUserRepoMockRecorder {
 	return m.recorder
 }
 
-// CheckUserByEmail mocks base method.
-func (m *MockUserRepo) CheckUserByEmail(arg0 string, arg1 *models.User) (*models.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckUserByEmail", arg0, arg1)
-	ret0, _ := ret[0].(*models.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckUserByEmail indicates an expected call of CheckUserByEmail.
-func (mr *MockUserRepoMockRecorder) CheckUserByEmail(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUserByEmail", reflect.TypeOf((*MockUserRepo)(nil).CheckUserByEmail), arg0, arg1)
-}
-
 // CheckUserByID mocks base method.
-func (m *MockUserRepo) CheckUserByID(arg0 int, arg1 *models.User) (*models.User, error) {
+func (m *MockUserRepo) CheckUserByID(arg0 string, arg1 *models.User) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckUserByID", arg0, arg1)
 	ret0, _ := ret[0].(*models.User)
@@ -64,8 +50,23 @@ func (mr *MockUserRepoMockRecorder) CheckUserByID(arg0, arg1 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUserByID", reflect.TypeOf((*MockUserRepo)(nil).CheckUserByID), arg0, arg1)
 }
 
+// CheckUserByPhoneNumber mocks base method.
+func (m *MockUserRepo) CheckUserByPhoneNumber(arg0 string) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckUserByPhoneNumber", arg0)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckUserByPhoneNumber indicates an expected call of CheckUserByPhoneNumber.
+func (mr *MockUserRepoMockRecorder) CheckUserByPhoneNumber(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUserByPhoneNumber", reflect.TypeOf((*MockUserRepo)(nil).CheckUserByPhoneNumber), arg0)
+}
+
 // FindById mocks base method.
-func (m *MockUserRepo) FindById(arg0 int) (*models.User, error) {
+func (m *MockUserRepo) FindById(arg0 string) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindById", arg0)
 	ret0, _ := ret[0].(*models.User)
@@ -94,8 +95,23 @@ func (mr *MockUserRepoMockRecorder) RegisterUser(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUser", reflect.TypeOf((*MockUserRepo)(nil).RegisterUser), arg0)
 }
 
+// UpdateBalance mocks base method.
+func (m *MockUserRepo) UpdateBalance(arg0 *gorm.DB, arg1 string, arg2 float64) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateBalance", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateBalance indicates an expected call of UpdateBalance.
+func (mr *MockUserRepoMockRecorder) UpdateBalance(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBalance", reflect.TypeOf((*MockUserRepo)(nil).UpdateBalance), arg0, arg1, arg2)
+}
+
 // UpdateUser mocks base method.
-func (m *MockUserRepo) UpdateUser(arg0 int, arg1 *models.User) (*models.User, error) {
+func (m *MockUserRepo) UpdateUser(arg0 string, arg1 *models.User) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", arg0, arg1)
 	ret0, _ := ret[0].(*models.User)

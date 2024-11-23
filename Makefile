@@ -1,12 +1,8 @@
 generate-mocks:
-	# mockery
-	@mockery --dir ./repositories --case underscore --output ./repositories/mocks --name UserRepo
-	@mockery --dir ./repositories --case underscore --output ./repositories/mocks --name ProductRepo
-	@mockery --dir ./repositories --case underscore --output ./repositories/mocks --name CartRepo
-	@mockery --dir ./repositories --case underscore --output ./repositories/mocks --name OrderRepo
-
 	# repositories
 	@mockgen -destination=./repositories/mocks/mock_user_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories UserRepo
-	@mockgen -destination=./repositories/mocks/mock_product_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories ProductRepo
-	@mockgen -destination=./repositories/mocks/mock_cart_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories CartRepo
-	@mockgen -destination=./repositories/mocks/mock_order_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories OrderRepo
+	@mockgen -destination=./repositories/mocks/mock_topup_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories TopupRepo
+	@mockgen -destination=./repositories/mocks/mock_payment_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories PaymentRepo
+	@mockgen -destination=./repositories/mocks/mock_transfer_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories TransferRepo
+	@mockgen -destination=./repositories/mocks/mock_transaction_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories TransactionRepo
+	@mockgen -destination=./repositories/mocks/mock_tx_manager_repository.go -package=mocks github.com/saipulmuiz/mnc-test-tahap2/repositories TxManagerRepo

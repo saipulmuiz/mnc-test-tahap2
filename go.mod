@@ -3,7 +3,6 @@ module github.com/saipulmuiz/mnc-test-tahap2
 go 1.18
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-contrib/size v0.0.0-20230212012657-e14a14094dc4
 	github.com/gin-gonic/gin v1.8.1
@@ -17,6 +16,8 @@ require (
 	gorm.io/driver/postgres v1.3.9
 	gorm.io/gorm v1.23.8
 )
+
+require github.com/stretchr/objx v0.4.0 // indirect
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
